@@ -1215,7 +1215,7 @@ var app = angular.module('ASMSimulator', []);
         },
         reset: function() {
             var self = this;
-            self.maxSP = 231;
+            self.maxSP = 239;
             self.minSP = 0;
 
             self.gpr = [0, 0, 0, 0];
@@ -1363,9 +1363,9 @@ var app = angular.module('ASMSimulator', []);
                      {speed: 8, desc: "8 HZ"},
                      {speed: 16, desc: "16 HZ"}];
     $scope.speed = 4;
-    $scope.outputStartIndex = 232;
+    $scope.outputStartIndex = 240;
 
-    $scope.code = "; Simple example\n; Writes Hello World to the output\n\n	JMP start\nhello: DB \"Hello World!\" ; Variable\n       DB 0	; String terminator\n\nstart:\n	MOV C, hello    ; Point to var \n	MOV D, 232	; Point to output\n	CALL print\n        HLT             ; Stop execution\n\nprint:			; print(C:*from, D:*to)\n	PUSH A\n	PUSH B\n	MOV B, 0\n.loop:\n	MOV A, [C]	; Get char from var\n	MOV [D], A	; Write to output\n	INC C\n	INC D  \n	CMP B, [C]	; Check if end\n	JNZ .loop	; jump if not\n\n	POP B\n	POP A\n	RET";
+    $scope.code = "; Simple example\n; Writes Hello World to the output\n\n	JMP start\nhello: DB \"Hello World!\" ; Variable\n       DB 0	; String terminator\n\nstart:\n	MOV C, hello    ; Point to var \n	MOV D, 240	; Point to output\n	CALL print\n        HLT             ; Stop execution\n\nprint:			; print(C:*from, D:*to)\n	PUSH A\n	PUSH B\n	MOV B, 0\n.loop:\n	MOV A, [C]	; Get char from var\n	MOV [D], A	; Write to output\n	INC C\n	INC D  \n	CMP B, [C]	; Check if end\n	JNZ .loop	; jump if not\n\n	POP B\n	POP A\n	RET";
 
     $scope.reset = function () {
         cpu.reset();
@@ -1427,7 +1427,13 @@ var app = angular.module('ASMSimulator', []);
     };
 
     $scope.getChar = function (value) {
-        var text = String.fromCharCode(value);
+        var HIGH = "█▓▒░♥♦♣♠";
+        var text;
+        if (value < 128) {
+            text = String.fromCharCode(value);
+        } else {
+            text = HIGH[value - 128] || "";
+        }
 
         if (text.trim() === '') {
             return '\u00A0\u00A0';
@@ -1503,9 +1509,9 @@ var app = angular.module('ASMSimulator', []);
         }
     };
 }]);
-;app.filter('flag', function() {
-    return function(input) {
-        return input.toString().toUpperCase();
+;app.filter('flag', function () {
+    return function (input) {
+        return input ? '1' : '0';
     };
 });
 ;app.filter('number', function() {

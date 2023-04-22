@@ -3,6 +3,7 @@
 <head>
     <title>Simple 8-bit Assembler Simulator in Javascript</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/style.css">
     <script type="text/javascript" src="//use.typekit.net/tor0zlh.js"></script>
@@ -13,14 +14,6 @@
     <nav class="navbar navbar-inverse" role="navigation" style="background-color:#428BCA;border:0px;border-radius:0px;">
         <div class="container">
             <div class="navbar-header">
-                <div class="btn-group">
-                    <button type="button" class="btn btn-success navbar-btn" ng-click="run()" ng-hide="isRunning"><span class="glyphicon glyphicon-play"></span> Run</button>
-                    <button type="button" class="btn btn-default navbar-btn" ng-click="stop()" ng-show="isRunning"><span class="glyphicon glyphicon-stop"></span> Stop</button>
-                    <button type="button" class="btn btn-default navbar-btn" ng-click="executeStep()" ng-disabled="isRunning"><span class="glyphicon glyphicon-forward"></span> Step</button>
-                </div>
-                <button type="button" class="btn btn-default navbar-btn" ng-click="reset()">Reset</button>
-            </div>
-            <div class="navbar-header navbar-right">
                 <a class="navbar-brand" style="color:#FFFFFF">Simple 8-bit Assembler Simulator</a>
             </div>
         </div>
@@ -31,7 +24,11 @@
             <div class="col-lg-7 col-md-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h4 class="panel-title">Code <small>(<a href="./instruction-set.html" target="_blank" style="color: #337AB7">Instruction Set</a>)</small></h4>
+                        <h4 class="panel-title" style="display: flex;">
+                            <span style="margin: auto 0;">Code <small>(<a href="./instruction-set.html" target="_blank" style="color: #337AB7">Instruction Set</a>)</small></span>
+                            <span style="flex-grow: 1;"></span>
+                            <button type="button" class="btn btn-default" ng-click="assemble()">Assemble</button>
+                        </h4>
                     </div>
                     <div class="panel-body">
                         <form role="form">
@@ -42,7 +39,6 @@
                                       tab-support
                                       select-line
                                       ng-model="code"></textarea>
-                            <button type="button" class="btn btn-default" ng-click="assemble()">Assemble</button>
                         </form>
                     </div>
                 </div>
@@ -62,10 +58,21 @@
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h4 class="panel-title">CPU & Memory</h4>
+                        <h4 class="panel-title" style="display: flex;">
+                            <span style="margin: auto 0;">CPU & Memory</span>
+                            <span style="flex-grow: 1;"></span>
+                            <button type="button" class="btn btn-success btn-sm" ng-click="run()"
+                                ng-hide="isRunning"><span class="glyphicon glyphicon-play"></span> Run</button>
+                            <button type="button" class="btn btn-default btn-sm" ng-click="stop()"
+                                ng-show="isRunning"><span class="glyphicon glyphicon-stop"></span> Stop</button>
+                            <button type="button" class="btn btn-default btn-sm" ng-click="executeStep()"
+                                ng-disabled="isRunning"><span class="glyphicon glyphicon-forward"></span>
+                                Step</button>
+                            <button type="button" class="btn btn-default btn-sm"
+                                ng-click="reset()">Reset</button>
+                        </h4>
                     </div>
                     <div class="panel-body">
-                        <p class="text-muted">Registers / Flags</p>
                         <table class="table table-condensed table-striped">
                             <thead>
                                 <tr>
@@ -82,19 +89,18 @@
                             </thead>
                             <tbody>
                                 <tr style="text-align:center;" class="source-code">
-                                    <td><div style="margin:auto;" ng-class="displayA && 'marker marker-a'"><small>{{ cpu.gpr[0] | number:displayHex }}</small></div></td>
-                                    <td><div style="margin:auto;" ng-class="displayB && 'marker marker-b'"><small>{{ cpu.gpr[1] | number:displayHex }}</small></div></td>
-                                    <td><div style="margin:auto;" ng-class="displayC && 'marker marker-c'"><small>{{ cpu.gpr[2] | number:displayHex }}</small></div></td>
-                                    <td><div style="margin:auto;" ng-class="displayD && 'marker marker-d'"><small>{{ cpu.gpr[3] | number:displayHex }}</small></div></td>
-                                    <td><div style="margin:auto;" class="marker marker-ip"><small>{{ cpu.ip | number:displayHex }}</small></div></td>
-                                    <td><div style="margin:auto;" class="marker marker-sp"><small>{{ cpu.sp | number:displayHex }}</small></div></td>
-                                    <td><small>{{ cpu.zero | flag }}</small></td>
-                                    <td><small>{{ cpu.carry | flag }}</small></td>
-                                    <td><small>{{ cpu.fault | flag }}</small></td>
+                                    <td><div style="margin:auto;" class="marker-base" ng-class="displayA && 'marker marker-a'"><small>{{ cpu.gpr[0] | number:displayHex }}</small></div></td>
+                                    <td><div style="margin:auto;" class="marker-base" ng-class="displayB && 'marker marker-b'"><small>{{ cpu.gpr[1] | number:displayHex }}</small></div></td>
+                                    <td><div style="margin:auto;" class="marker-base" ng-class="displayC && 'marker marker-c'"><small>{{ cpu.gpr[2] | number:displayHex }}</small></div></td>
+                                    <td><div style="margin:auto;" class="marker-base" ng-class="displayD && 'marker marker-d'"><small>{{ cpu.gpr[3] | number:displayHex }}</small></div></td>
+                                    <td><div style="margin:auto;" class="marker-base marker marker-ip"><small>{{ cpu.ip | number:displayHex }}</small></div></td>
+                                    <td><div style="margin:auto;" class="marker-base marker marker-sp"><small>{{ cpu.sp | number:displayHex }}</small></div></td>
+                                    <td><div style="margin:auto;" class="marker-base" ng-class="cpu.zero && 'marker marker-f'"><small>{{ cpu.zero | flag }}</small></div></td>
+                                    <td><div style="margin:auto;" class="marker-base" ng-class="cpu.carry && 'marker marker-f'"><small>{{ cpu.carry | flag }}</small></div></td>
+                                    <td><div style="margin:auto;" class="marker-base" ng-class="cpu.fault && 'marker marker-f'"><small>{{ cpu.fault | flag }}</small></div></td>
                                 </tr>
                             </tbody>
                         </table>
-                        <p class="text-muted">RAM</p>
                         <div style="width:29em;" class="source-code">
                             <div class="memory-block"
                                  ng-repeat="m in memory.data track by $index"

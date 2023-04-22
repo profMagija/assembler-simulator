@@ -11,6 +11,7 @@
     margin-right: 1px;
     margin-bottom: 1px;
     text-align: center;
+    font-size: 175%;
 }
 
 .instr-bg {
@@ -32,10 +33,13 @@
     text-align: center;
 }
 
-.marker {
+.marker-base {
     width: 1.8em;
-    color: #FFF;
     border-radius: 2px;
+}
+
+.marker {
+    color: #FFF;
 }
 
 .marker-ip {
@@ -60,6 +64,10 @@
 
 .marker-d {
 	background-color: #E81F1F;
+}
+
+.marker-f {
+	background-color: #2a3564;
 }
 
 .codelabel-line a {
