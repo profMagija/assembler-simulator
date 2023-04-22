@@ -9,10 +9,11 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
     $scope.displayB = false;
     $scope.displayC = false;
     $scope.displayD = false;
-    $scope.speeds = [{speed: 1, desc: "1 HZ"},
-                     {speed: 4, desc: "4 HZ"},
-                     {speed: 8, desc: "8 HZ"},
-                     {speed: 16, desc: "16 HZ"}];
+    $scope.speeds = [{speed: 1, desc: "1 Hz"},
+                     {speed: 4, desc: "4 Hz"},
+                     {speed: 8, desc: "8 Hz"},
+                     {speed: 16, desc: "16 Hz"},
+                     {speed: 100, desc: "100 Hz"}];
     $scope.speed = 4;
     $scope.outputStartIndex = 240;
 
