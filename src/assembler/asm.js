@@ -602,6 +602,19 @@ app.service('assembler', ['opcodes', function (opcodes) {
 
                                     code.push(opCode, p1.value, p2.value);
                                     break;
+                            
+                                case 'RND':
+                                    p1 = getValue(match[op1_group]);
+                                    checkNoExtraArg('RND', match[op2_group]);
+
+                                    if (p1.type === "register")
+                                        opCode = opcodes.RND_REG;
+                                    else
+                                        throw "RND does not support this operand";
+
+                                    code.push(opCode, p1.value);
+
+                                    break;
                                 default:
                                     throw "Invalid instruction: " + match[2];
                             }

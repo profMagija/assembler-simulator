@@ -603,6 +603,19 @@ var app = angular.module('ASMSimulator', []);
 
                                     code.push(opCode, p1.value, p2.value);
                                     break;
+                            
+                                case 'RND':
+                                    p1 = getValue(match[op1_group]);
+                                    checkNoExtraArg('RND', match[op2_group]);
+
+                                    if (p1.type === "register")
+                                        opCode = opcodes.RND_REG;
+                                    else
+                                        throw "RND does not support this operand";
+
+                                    code.push(opCode, p1.value);
+
+                                    break;
                                 default:
                                     throw "Invalid instruction: " + match[2];
                             }
@@ -738,10 +751,14 @@ var app = angular.module('ASMSimulator', []);
 
                     return Math.floor(self.gpr[0] / divisor);
                 };
+                
+                var adjust8its = function(value) {
+                    if (value < 0 || value >= 256) {
+                        value = ((value % 256) + 256) % 256;
+                    }
 
-                if (self.ip < 0 || self.ip >= memory.data.length) {
-                    throw "Instruction pointer is outside of memory";
-                }
+                    return value;
+                };
                 
                 var regTo, regFrom, memFrom, memTo, number;
                 var instr = memory.load(self.ip);
@@ -1185,9 +1202,21 @@ var app = angular.module('ASMSimulator', []);
                         self.gpr[regTo] = checkOperation(self.gpr[regTo] >>> number);
                         self.ip++;
                         break;
+                    case opcodes.RND_REG:
+                        regTo = checkGPR_SP(memory.load(++self.ip));
+                        setGPR_SP(regTo, Math.floor(Math.random() * 256));
+                        self.ip++;
+                        break;
                     default:
                         throw "Invalid op code: " + instr;
                 }
+                
+                self.ip = adjust8its(self.ip);
+                self.sp = adjust8its(self.sp);
+                self.gpr[0] = adjust8its(self.gpr[0]);
+                self.gpr[1] = adjust8its(self.gpr[1]);
+                self.gpr[2] = adjust8its(self.gpr[2]);
+                self.gpr[3] = adjust8its(self.gpr[3]);
 
                 return true;
             } catch(e) {
@@ -1324,7 +1353,8 @@ var app = angular.module('ASMSimulator', []);
         SHR_REG_WITH_REG: 94,
         SHR_REGADDRESS_WITH_REG: 95,
         SHR_ADDRESS_WITH_REG: 96,
-        SHR_NUMBER_WITH_REG: 97
+        SHR_NUMBER_WITH_REG: 97,
+        RND_REG: 98,
     };
 
     return opcodes;
@@ -1344,7 +1374,7 @@ var app = angular.module('ASMSimulator', []);
                      {speed: 4, desc: "4 Hz"},
                      {speed: 8, desc: "8 Hz"},
                      {speed: 16, desc: "16 Hz"},
-                     {speed: 100, desc: "100 Hz"}];
+                     {speed: Infinity, desc: "Turbo"}];
     $scope.speed = 4;
     $scope.outputStartIndex = 240;
 
@@ -1410,12 +1440,12 @@ var app = angular.module('ASMSimulator', []);
     };
 
     $scope.getChar = function (value) {
-        var HIGH = "█▓▒░♥♦♣♠";
+        var HIGH = " ░▒▓█▀▄◼◻●○◀▶▼▲▪";
         var text;
-        if (value < 128) {
+        if (value >= 32) {
             text = String.fromCharCode(value);
         } else {
-            text = HIGH[value - 128] || "";
+            text = HIGH[value] || "";
         }
 
         if (text.trim() === '') {

@@ -101,10 +101,14 @@ app.service('cpu', ['opcodes', 'memory', function(opcodes, memory) {
 
                     return Math.floor(self.gpr[0] / divisor);
                 };
+                
+                var adjust8its = function(value) {
+                    if (value < 0 || value >= 256) {
+                        value = ((value % 256) + 256) % 256;
+                    }
 
-                if (self.ip < 0 || self.ip >= memory.data.length) {
-                    throw "Instruction pointer is outside of memory";
-                }
+                    return value;
+                };
                 
                 var regTo, regFrom, memFrom, memTo, number;
                 var instr = memory.load(self.ip);
@@ -548,9 +552,21 @@ app.service('cpu', ['opcodes', 'memory', function(opcodes, memory) {
                         self.gpr[regTo] = checkOperation(self.gpr[regTo] >>> number);
                         self.ip++;
                         break;
+                    case opcodes.RND_REG:
+                        regTo = checkGPR_SP(memory.load(++self.ip));
+                        setGPR_SP(regTo, Math.floor(Math.random() * 256));
+                        self.ip++;
+                        break;
                     default:
                         throw "Invalid op code: " + instr;
                 }
+                
+                self.ip = adjust8its(self.ip);
+                self.sp = adjust8its(self.sp);
+                self.gpr[0] = adjust8its(self.gpr[0]);
+                self.gpr[1] = adjust8its(self.gpr[1]);
+                self.gpr[2] = adjust8its(self.gpr[2]);
+                self.gpr[3] = adjust8its(self.gpr[3]);
 
                 return true;
             } catch(e) {

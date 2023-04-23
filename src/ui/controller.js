@@ -13,7 +13,7 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
                      {speed: 4, desc: "4 Hz"},
                      {speed: 8, desc: "8 Hz"},
                      {speed: 16, desc: "16 Hz"},
-                     {speed: 100, desc: "100 Hz"}];
+                     {speed: Infinity, desc: "Turbo"}];
     $scope.speed = 4;
     $scope.outputStartIndex = 240;
 
@@ -79,12 +79,12 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
     };
 
     $scope.getChar = function (value) {
-        var HIGH = "█▓▒░♥♦♣♠";
+        var HIGH = " ░▒▓█▀▄◼◻●○◀▶▼▲▪";
         var text;
-        if (value < 128) {
+        if (value >= 32) {
             text = String.fromCharCode(value);
         } else {
-            text = HIGH[value - 128] || "";
+            text = HIGH[value] || "";
         }
 
         if (text.trim() === '') {
