@@ -21,10 +21,15 @@
 .instr-bg a {
     color: inherit;
     cursor: pointer;
+    text-decoration: underline;
+}
+
+.code-bg {
+    background-color: #E6F3FF;
 }
 
 .stack-bg {
-    background-color: #F8DCB4;
+    background-color: #E6F3FF;
 }
 
 .memory-block {
@@ -47,7 +52,7 @@
 }
 
 .marker-sp {
-    background-color: #EEA236;
+    background-color: #428BCA;
 }
 
 .marker-a {
@@ -63,11 +68,11 @@
 }
 
 .marker-d {
-	background-color: #E81F1F;
+	background-color: #EEA236;
 }
 
 .marker-f {
-	background-color: #2a3564;
+	background-color: #E81F1F;
 }
 
 .codelabel-line a {

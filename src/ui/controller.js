@@ -17,6 +17,8 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
     $scope.speed = 4;
     $scope.outputStartIndex = 240;
 
+    $scope.codeSize = 0;
+    
     $scope.code = "; Simple example\n; Writes Hello World to the output\n\n	JMP start\nhello: DB \"Hello World!\" ; Variable\n       DB 0	; String terminator\n\nstart:\n	MOV C, hello    ; Point to var \n	MOV D, 240	; Point to output\n	CALL print\n        HLT             ; Stop execution\n\nprint:			; print(C:*from, D:*to)\n	PUSH A\n	PUSH B\n	MOV B, 0\n.loop:\n	MOV A, [C]	; Get char from var\n	MOV [D], A	; Write to output\n	INC C\n	INC D  \n	CMP B, [C]	; Check if end\n	JNZ .loop	; jump if not\n\n	POP B\n	POP A\n	RET";
     
     function shouldHighlightLines() {
@@ -114,6 +116,8 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
             for (var i = 0, l = binary.length; i < l; i++) {
                 memory.data[i] = binary[i];
             }
+            
+            $scope.codeSize = binary.length;
         } catch (e) {
             if (e.line !== undefined) {
                 $scope.error = e.line + " | " + e.error;
@@ -143,6 +147,8 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
             return 'output-bg';
         } else if ($scope.isInstruction(index)) {
             return 'instr-bg';
+        } else if (index < $scope.codeSize) {
+            return 'code-bg';
         } else if (index > cpu.sp && index <= cpu.maxSP) {
             return 'stack-bg';
         } else {
