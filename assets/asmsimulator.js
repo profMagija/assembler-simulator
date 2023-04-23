@@ -667,13 +667,6 @@ var app = angular.module('ASMSimulator', []);
                         self.gpr[reg] = value;
                     } else if(reg == self.gpr.length) {
                         self.sp = value;
-
-                        // Not likely to happen, since we always get here after checkOpertion().
-                        if (self.sp < self.minSP) {
-                            throw "Stack overflow";
-                        } else if (self.sp > self.maxSP) {
-                            throw "Stack underflow";
-                        }
                     } else {
                         throw "Invalid register: " + reg;
                     }
@@ -726,26 +719,15 @@ var app = angular.module('ASMSimulator', []);
                 };
 
                 var jump = function(newIP) {
-                    if (newIP < 0 || newIP >= memory.data.length) {
-                        throw "IP outside memory";
-                    } else {
-                        self.ip = newIP;
-                    }
+                    self.ip = newIP;
                 };
 
                 var push = function(value) {
                     memory.store(self.sp--, value);
-                    if (self.sp < self.minSP) {
-                        throw "Stack overflow";
-                    }
                 };
 
                 var pop = function() {
                     var value = memory.load(++self.sp);
-                    if (self.sp > self.maxSP) {
-                        throw "Stack underflow";
-                    }
-
                     return value;
                 };
 
@@ -1238,7 +1220,7 @@ var app = angular.module('ASMSimulator', []);
             var self = this;
 
             if (address < 0 || address >= self.data.length) {
-                throw "Memory access violation at " + address;
+                address = ((address % 256) + 256) % 256;
             }
 
             self.lastAccess = address;
@@ -1248,7 +1230,7 @@ var app = angular.module('ASMSimulator', []);
             var self = this;
 
             if (address < 0 || address >= self.data.length) {
-                throw "Memory access violation at " + address;
+                address = ((address % 256) + 256) % 256;
             }
 
             self.lastAccess = address;
