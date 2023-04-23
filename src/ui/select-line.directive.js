@@ -4,7 +4,6 @@ app.directive('selectLine', [function () {
         restrict: 'A',
         link: function (scope, element, attrs, controller) {
             scope.$watch('selectedLine', function () {
-                console.log(attrs);
                 if (scope.selectedLine >= 0) {
                     var lines = element[0].value.split("\n");
 
