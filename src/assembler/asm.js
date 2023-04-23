@@ -110,18 +110,18 @@ app.service('assembler', ['opcodes', function (opcodes) {
                 var register = parseRegister(input);
 
                 if (register !== undefined) {
-                    return {type: typeReg, value: register};
+                    return { type: typeReg, value: register };
                 } else {
                     var label = parseLabel(input);
                     if (label !== undefined) {
-                        return {type: typeNumber, value: label};
+                        return { type: typeNumber, value: label };
                     } else {
                         if (typeReg === "regaddress") {
 
                             register = parseOffsetAddressing(input);
 
                             if (register !== undefined) {
-                                return {type: typeReg, value: register};
+                                return { type: typeReg, value: register };
                             }
                         }
 
@@ -133,7 +133,7 @@ app.service('assembler', ['opcodes', function (opcodes) {
                         else if (value < 0 || value > 255)
                             throw typeNumber + " must have a value between 0-255";
 
-                        return {type: typeNumber, value: value};
+                        return { type: typeNumber, value: value };
                     }
                 }
             };
@@ -155,13 +155,13 @@ app.service('assembler', ['opcodes', function (opcodes) {
                             chars.push(text.charCodeAt(i));
                         }
 
-                        return {type: "numbers", value: chars};
+                        return { type: "numbers", value: chars };
                     case "'": // 'C'
                         var character = input.slice(1, input.length - 1);
                         if (character.length > 1)
                             throw "Only one character is allowed. Use String instead";
 
-                        return {type: "number", value: character.charCodeAt(0)};
+                        return { type: "number", value: character.charCodeAt(0) };
                     default: // REGISTER, NUMBER or LABEL
                         return parseRegOrNumber(input, "register", "number");
                 }
@@ -602,7 +602,7 @@ app.service('assembler', ['opcodes', function (opcodes) {
 
                                     code.push(opCode, p1.value, p2.value);
                                     break;
-                            
+
                                 case 'RND':
                                     p1 = getValue(match[op1_group]);
                                     checkNoExtraArg('RND', match[op2_group]);
@@ -613,6 +613,30 @@ app.service('assembler', ['opcodes', function (opcodes) {
                                         throw "RND does not support this operand";
 
                                     code.push(opCode, p1.value);
+
+                                    break;
+                                case 'IN':
+                                    p1 = getValue(match[op1_group]);
+                                    p2 = getValue(match[op2_group]);
+                                    if (p1.type === "register" && p2.type == "address")
+                                        opCode = opcodes.IN_REG_PORT;
+                                    else
+                                        throw instr + " does not support this operands";
+
+                                    code.push(opCode, p1.value, p2.value);
+
+                                    break;
+                                case 'OUT':
+                                    p1 = getValue(match[op1_group]);
+                                    p2 = getValue(match[op2_group]);
+                                    if (p1.type === "address" && p2.type == "register")
+                                        opCode = opcodes.OUT_PORT_REG;
+                                    else if (p1.type === "address" && p2.type == "number")
+                                        opCode = opcodes.OUT_PORT_NUMBER;
+                                    else
+                                        throw instr + " does not support this operands";
+
+                                    code.push(opCode, p1.value, p2.value);
 
                                     break;
                                 default:
@@ -627,7 +651,7 @@ app.service('assembler', ['opcodes', function (opcodes) {
                         }
                     }
                 } catch (e) {
-                    throw {error: e, line: i};
+                    throw { error: e, line: i };
                 }
             }
 
@@ -638,12 +662,12 @@ app.service('assembler', ['opcodes', function (opcodes) {
                         code[i] = labels[code[i]];
                     } else {
 
-                        throw {error: "Undefined label: " + code[i]};
+                        throw { error: "Undefined label: " + code[i] };
                     }
                 }
             }
 
-            return {code: code, mapping: mapping, labels: labels};
+            return { code: code, mapping: mapping, labels: labels };
         }
     };
 }]);
