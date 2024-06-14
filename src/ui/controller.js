@@ -30,6 +30,9 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
         memory.reset();
         $scope.error = '';
         $scope.selectedLine = -1;
+        $scope.mapping = {};
+        $scope.labels = {};
+        $scope.codeSize = 0;
     };
 
     $scope.executeStep = function () {
