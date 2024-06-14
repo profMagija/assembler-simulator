@@ -222,6 +222,7 @@ app.service('assembler', ['opcodes', function (opcodes) {
                                     code.push(opCode);
                                     break;
 
+                                case 'LD':
                                 case 'MOV':
                                     p1 = getValue(match[op1_group]);
                                     p2 = getValue(match[op2_group]);
