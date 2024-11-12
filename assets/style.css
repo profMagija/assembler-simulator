@@ -17,14 +17,14 @@
 .bitmap-output-row {
     display: block;
     text-wrap: nowrap;
-    margin-bottom: 0.3em;
+    margin-bottom: 0.2em;
 }
 
 .bitmap-output-col {
     display: inline-block;
     width: 1.5em;
     height: 1.5em;
-    margin-right: 0.3em;
+    margin-right: 0.2em;
 }
 
 .bitmap-output-col.on {
