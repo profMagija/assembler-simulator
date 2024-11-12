@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html ng-app="ASMSimulator">
+
 <head>
     <title>Simple 8-bit Assembler Simulator in Javascript</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,9 @@
     <link rel="stylesheet" href="vendor/bootstrap.min.css">
     <link rel="stylesheet" href="assets/style.css">
     <script type="text/javascript" src="vendor/tor0zlh.js"></script>
-    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+    <script type="text/javascript">try { Typekit.load(); } catch (e) { }</script>
 </head>
+
 <body ng-controller="Ctrl">
     <nav class="navbar navbar-inverse" role="navigation" style="background-color:#428BCA;border:0px;border-radius:0px;">
         <div class="container">
@@ -24,20 +26,16 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4 class="panel-title" style="display: flex;">
-                            <span style="margin: auto 0;">Code <small>(<a href="./instruction-set.html" target="_blank" style="color: #337AB7">Instruction Set</a>)</small></span>
+                            <span style="margin: auto 0;">Code <small>(<a href="./instruction-set.html" target="_blank"
+                                        style="color: #337AB7">Instruction Set</a>)</small></span>
                             <span style="flex-grow: 1;"></span>
                             <button type="button" class="btn btn-default" ng-click="assemble()">Assemble</button>
                         </h4>
                     </div>
                     <div class="panel-body">
                         <form role="form">
-                            <textarea id="sourceCode"
-                                      class="form-control source-code"
-                                      style="margin-bottom:5px;"
-                                      rows="35"
-                                      tab-support
-                                      select-line
-                                      ng-model="code"></textarea>
+                            <textarea id="sourceCode" class="form-control source-code" style="margin-bottom:5px;"
+                                rows="35" tab-support select-line ng-model="code"></textarea>
                         </form>
                     </div>
                 </div>
@@ -45,20 +43,23 @@
             <div class="clearfix visible-xs visible-sm"></div>
             <div class="col-lg-5 col-md-6">
                 <div class="panel panel-default">
-                    <div class="panel-heading" style="display: flex;">
-                        <h4 class="panel-title">Output</h4>
-                        <span style="flex-grow: 1;"></span>
-                        <button type="button" class="btn btn-default" ng-click="changeVideoMode()">{{ curVideoMode() }}</button>
+                    <div class="panel-heading">
+                        <h4 class="panel-title" style="display: flex;">
+                            <span style="margin: auto 0;">Output</span>
+                            <span style="flex-grow: 1;"></span>
+                            <button type="button" class="btn btn-default" ng-click="changeVideoMode()">
+                                {{ curVideoMode() }}
+                            </button>
+                        </h4>
                     </div>
-                    <div class="panel-body source-code" ng-if="!bitmapMode">
-                        <div style="float:left;" class="output"
-                             ng-repeat="m in memory.data | startFrom: outputStartIndex track by $index">
+                    <div class="panel-body source-code output-container" ng-if="!bitmapMode">
+                        <div class="output" ng-repeat="m in memory.data | startFrom: outputStartIndex track by $index">
                             <span>{{ getChar(m) }}</span>
                         </div>
                     </div>
-                    <div class="panel-body source-code" ng-if="bitmapMode">
+                    <div class="panel-body source-code output-container" ng-if="bitmapMode">
                         <div class="bitmap-output-row" ng-repeat="row in [0, 1, 2, 3, 4, 5, 6, 7]">
-                            <div  ng-repeat="m in memory.data | startFrom: outputStartIndex track by $index"
+                            <div ng-repeat="m in memory.data | startFrom: outputStartIndex track by $index"
                                 class="bitmap-output-col {{ getCharBitmap(m, row) }}">
                                 &nbsp;
                             </div>
@@ -77,8 +78,7 @@
                             <button type="button" class="btn btn-default btn-sm" ng-click="executeStep()"
                                 ng-disabled="isRunning"><span class="glyphicon glyphicon-forward"></span>
                                 Step</button>
-                            <button type="button" class="btn btn-default btn-sm"
-                                ng-click="reset()">Reset</button>
+                            <button type="button" class="btn btn-default btn-sm" ng-click="reset()">Reset</button>
                         </h4>
                     </div>
                     <div class="panel-body">
@@ -98,42 +98,76 @@
                             </thead>
                             <tbody>
                                 <tr style="text-align:center;" class="source-code">
-                                    <td><div style="margin:auto;" class="marker-base" ng-class="displayA && 'marker marker-a'"><small>{{ cpu.gpr[0] | number:displayHex }}</small></div></td>
-                                    <td><div style="margin:auto;" class="marker-base" ng-class="displayB && 'marker marker-b'"><small>{{ cpu.gpr[1] | number:displayHex }}</small></div></td>
-                                    <td><div style="margin:auto;" class="marker-base" ng-class="displayC && 'marker marker-c'"><small>{{ cpu.gpr[2] | number:displayHex }}</small></div></td>
-                                    <td><div style="margin:auto;" class="marker-base" ng-class="displayD && 'marker marker-d'"><small>{{ cpu.gpr[3] | number:displayHex }}</small></div></td>
-                                    <td><div style="margin:auto;" class="marker-base marker marker-ip"><small>{{ cpu.ip | number:displayHex }}</small></div></td>
-                                    <td><div style="margin:auto;" class="marker-base marker marker-sp"><small>{{ cpu.sp | number:displayHex }}</small></div></td>
-                                    <td><div style="margin:auto;" class="marker-base" ng-class="cpu.zero && 'marker marker-f'"><small>{{ cpu.zero | flag }}</small></div></td>
-                                    <td><div style="margin:auto;" class="marker-base" ng-class="cpu.carry && 'marker marker-f'"><small>{{ cpu.carry | flag }}</small></div></td>
-                                    <td><div style="margin:auto;" class="marker-base" ng-class="cpu.fault && 'marker marker-f'"><small>{{ cpu.fault | flag }}</small></div></td>
+                                    <td>
+                                        <div style="margin:auto;" class="marker-base"
+                                            ng-class="displayA && 'marker marker-a'"><small>{{ cpu.gpr[0] |
+                                                number:displayHex }}</small></div>
+                                    </td>
+                                    <td>
+                                        <div style="margin:auto;" class="marker-base"
+                                            ng-class="displayB && 'marker marker-b'"><small>{{ cpu.gpr[1] |
+                                                number:displayHex }}</small></div>
+                                    </td>
+                                    <td>
+                                        <div style="margin:auto;" class="marker-base"
+                                            ng-class="displayC && 'marker marker-c'"><small>{{ cpu.gpr[2] |
+                                                number:displayHex }}</small></div>
+                                    </td>
+                                    <td>
+                                        <div style="margin:auto;" class="marker-base"
+                                            ng-class="displayD && 'marker marker-d'"><small>{{ cpu.gpr[3] |
+                                                number:displayHex }}</small></div>
+                                    </td>
+                                    <td>
+                                        <div style="margin:auto;" class="marker-base marker marker-ip"><small>{{ cpu.ip
+                                                | number:displayHex }}</small></div>
+                                    </td>
+                                    <td>
+                                        <div style="margin:auto;" class="marker-base marker marker-sp"><small>{{ cpu.sp
+                                                | number:displayHex }}</small></div>
+                                    </td>
+                                    <td>
+                                        <div style="margin:auto;" class="marker-base"
+                                            ng-class="cpu.zero && 'marker marker-f'"><small>{{ cpu.zero | flag
+                                                }}</small></div>
+                                    </td>
+                                    <td>
+                                        <div style="margin:auto;" class="marker-base"
+                                            ng-class="cpu.carry && 'marker marker-f'"><small>{{ cpu.carry | flag
+                                                }}</small></div>
+                                    </td>
+                                    <td>
+                                        <div style="margin:auto;" class="marker-base"
+                                            ng-class="cpu.fault && 'marker marker-f'"><small>{{ cpu.fault | flag
+                                                }}</small></div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                         <div style="width:29em;" class="source-code">
-                            <div class="memory-block"
-                                 ng-repeat="m in memory.data track by $index"
-                                 ng-class="getMemoryCellCss($index)">
-                                 <div ng-class="getMemoryInnerCellCss($index)" ng-switch="isInstruction($index)">
-                                     <small ng-switch-default>{{ m | number:displayHex }}</small>
-                                     <a ng-switch-when="true" ng-click="jumpToLine($index)">
-                                         <small>{{ m | number:displayHex }}</small>
-                                     </a>
-                                 </div>
+                            <div class="memory-block" ng-repeat="m in memory.data track by $index"
+                                ng-class="getMemoryCellCss($index)">
+                                <div ng-class="getMemoryInnerCellCss($index)" ng-switch="isInstruction($index)">
+                                    <small ng-switch-default>{{ m | number:displayHex }}</small>
+                                    <a ng-switch-when="true" ng-click="jumpToLine($index)">
+                                        <small>{{ m | number:displayHex }}</small>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <p style="margin-top:5px;">
                             <small>
                                 <span>Clock speed:</span>
-                                <select ng-model="speed" ng-options="item.speed as item.desc for item in speeds"></select>
+                                <select ng-model="speed"
+                                    ng-options="item.speed as item.desc for item in speeds"></select>
                                 <span style="margin-left:5px;">Instructions:</span>
                                 <a ng-click="displayInstr = true" ng-hide="displayInstr">Show</a>
                                 <a ng-click="displayInstr = false" ng-show="displayInstr">Hide</a>
                                 <span style="margin-left:5px;">View:</span>
                                 <a ng-click="displayHex = true" ng-hide="displayHex">Hex</a>
                                 <a ng-click="displayHex = false" ng-show="displayHex">Decimal</a>
-								<br>
-								Register addressing: 
+                                <br>
+                                Register addressing:
                                 <span style="margin-left:5px;">A:</span>
                                 <a ng-click="displayA = true" ng-hide="displayA">Show</a>
                                 <a ng-click="displayA = false" ng-show="displayA">Hide</a>
@@ -163,7 +197,8 @@
                             </tr>
                             <tr ng-repeat="(name, value) in labels" class="codelabel">
                                 <td class="codelabel-name">{{ name }}</td>
-                                <td class="codelabel-line"><a ng-click="jumpToLine(value)">{{ value | number:displayHex }}</a></td>
+                                <td class="codelabel-line"><a ng-click="jumpToLine(value)">{{ value | number:displayHex
+                                        }}</a></td>
                                 <td class="codelabel-value">{{ memory.data[value] | number:displayHex }}
                                     <span ng-if="memory.data[value] >= 32 && memory.data[value] <= 126">
                                         ('{{ getChar(memory.data[value]) }}')
@@ -175,10 +210,13 @@
                 </div>
             </div>
         </div>
-        <hr style="margin-top:10px;margin-bottom:10px;"/>
-        <p><small>by Marco Schweighauser (2015) | MIT License | <a href="https://www.mschweighauser.com/make-your-own-assembler-simulator-in-javascript-part1/" target="_blank">Blog</a></small></p>
+        <hr style="margin-top:10px;margin-bottom:10px;" />
+        <p><small>by Marco Schweighauser (2015) | MIT License | <a
+                    href="https://www.mschweighauser.com/make-your-own-assembler-simulator-in-javascript-part1/"
+                    target="_blank">Blog</a></small></p>
     </div>
     <script src="vendor/angular.min.js"></script>
     <script src="assets/asmsimulator.js"></script>
 </body>
+
 </html>

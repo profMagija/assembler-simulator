@@ -2,14 +2,19 @@
     font-family: source-code-pro, Courier New;
 }
 
+.output-container {
+    text-align: center;
+}
+
 .output, .output-bg, .bitmap-output-col {
+    display: inline-block;
     background-color: #DFDFDF;
 }
 
 .output {
     width: 1em;
-    margin-right: 1px;
-    margin-bottom: 1px;
+    margin-right: 2px;
+    margin-bottom: 2px;
     text-align: center;
     font-size: 175%;
 }
@@ -17,21 +22,20 @@
 .bitmap-output-row {
     display: block;
     text-wrap: nowrap;
-    margin-bottom: 0.2em;
+    margin-bottom: 2px;
 }
 
 .bitmap-output-col {
-    display: inline-block;
     width: 1.5em;
     height: 1.5em;
-    margin-right: 0.2em;
-}
-
-.bitmap-output-col.on {
-    background-color: #DFDFDF;
+    margin-right: 2px;
 }
 
 .bitmap-output-col.off {
+    background-color: #DFDFDF;
+}
+
+.bitmap-output-col.on {
     background-color: #000;
 }
 
