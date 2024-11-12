@@ -45,13 +45,23 @@
             <div class="clearfix visible-xs visible-sm"></div>
             <div class="col-lg-5 col-md-6">
                 <div class="panel panel-default">
-                    <div class="panel-heading">
+                    <div class="panel-heading" style="display: flex;">
                         <h4 class="panel-title">Output</h4>
+                        <span style="flex-grow: 1;"></span>
+                        <button type="button" class="btn btn-default" ng-click="changeVideoMode()">{{ curVideoMode() }}</button>
                     </div>
-                    <div class="panel-body source-code">
+                    <div class="panel-body source-code" ng-if="!bitmapMode">
                         <div style="float:left;" class="output"
                              ng-repeat="m in memory.data | startFrom: outputStartIndex track by $index">
                             <span>{{ getChar(m) }}</span>
+                        </div>
+                    </div>
+                    <div class="panel-body source-code" ng-if="bitmapMode">
+                        <div class="bitmap-output-row" ng-repeat="row in [0, 1, 2, 3, 4, 5, 6, 7]">
+                            <div  ng-repeat="m in memory.data | startFrom: outputStartIndex track by $index"
+                                class="bitmap-output-col {{ getCharBitmap(m, row) }}">
+                                &nbsp;
+                            </div>
                         </div>
                     </div>
                 </div>

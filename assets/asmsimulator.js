@@ -1468,18 +1468,19 @@ var app = angular.module('ASMSimulator', []);
     $scope.displayB = false;
     $scope.displayC = false;
     $scope.displayD = false;
-    $scope.speeds = [{speed: 1, desc: "1 Hz"},
-                     {speed: 4, desc: "4 Hz"},
-                     {speed: 8, desc: "8 Hz"},
-                     {speed: 16, desc: "16 Hz"},
-                     {speed: Infinity, desc: "Turbo"}];
+    $scope.speeds = [{ speed: 1, desc: "1 Hz" },
+    { speed: 4, desc: "4 Hz" },
+    { speed: 8, desc: "8 Hz" },
+    { speed: 16, desc: "16 Hz" },
+    { speed: Infinity, desc: "Turbo" }];
     $scope.speed = 4;
     $scope.outputStartIndex = 240;
+    $scope.bitmapMode = false;
 
     $scope.codeSize = 0;
-    
+
     $scope.code = "; Simple example\n; Writes Hello World to the output\n\n	JMP start\nhello: DB \"Hello World!\" ; Variable\n       DB 0	; String terminator\n\nstart:\n	MOV C, hello    ; Point to var \n	MOV D, 240	; Point to output\n	CALL print\n        HLT             ; Stop execution\n\nprint:			; print(C:*from, D:*to)\n	PUSH A\n	PUSH B\n	MOV B, 0\n.loop:\n	MOV A, [C]	; Get char from var\n	MOV [D], A	; Write to output\n	INC C\n	INC D  \n	CMP B, [C]	; Check if end\n	JNZ .loop	; jump if not\n\n	POP B\n	POP A\n	RET";
-    
+
     function shouldHighlightLines() {
         return !$scope.isRunning;
     }
@@ -1547,6 +1548,14 @@ var app = angular.module('ASMSimulator', []);
         return false;
     };
 
+    $scope.changeVideoMode = function () {
+        $scope.bitmapMode = !$scope.bitmapMode;
+    };
+
+    $scope.curVideoMode = function () {
+        return $scope.bitmapMode ? "Bitmap" : "Text";
+    };
+
     $scope.getChar = function (value) {
         var HIGH = " ░▒▓█▀▄◼◻●○◀▶▼▲▪";
         var text;
@@ -1561,6 +1570,11 @@ var app = angular.module('ASMSimulator', []);
         } else {
             return text;
         }
+    };
+
+    $scope.getCharBitmap = function (value, row) {
+        var pix = (value & (1 << row)) !== 0;
+        return pix ? 'on' : 'off';
     };
 
     $scope.assemble = function () {
@@ -1578,7 +1592,7 @@ var app = angular.module('ASMSimulator', []);
             for (var i = 0, l = binary.length; i < l; i++) {
                 memory.data[i] = binary[i];
             }
-            
+
             $scope.codeSize = binary.length;
         } catch (e) {
             if (e.line !== undefined) {

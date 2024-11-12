@@ -2,7 +2,7 @@
     font-family: source-code-pro, Courier New;
 }
 
-.output, .output-bg {
+.output, .output-bg, .bitmap-output-col {
     background-color: #DFDFDF;
 }
 
@@ -12,6 +12,27 @@
     margin-bottom: 1px;
     text-align: center;
     font-size: 175%;
+}
+
+.bitmap-output-row {
+    display: block;
+    text-wrap: nowrap;
+    margin-bottom: 0.3em;
+}
+
+.bitmap-output-col {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 0.3em;
+}
+
+.bitmap-output-col.on {
+    background-color: #DFDFDF;
+}
+
+.bitmap-output-col.off {
+    background-color: #000;
 }
 
 .instr-bg {
