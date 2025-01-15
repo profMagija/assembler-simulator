@@ -221,6 +221,7 @@ app.service('assembler', ['opcodes', function (opcodes) {
                                     opCode = opcodes.NOP;
                                     code.push(opCode);
                                     break;
+                                case 'HLT':
                                 case 'HALT':
                                     checkNoExtraArg('HALT', match[op1_group]);
                                     opCode = opcodes.HALT;

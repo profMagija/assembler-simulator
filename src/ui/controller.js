@@ -23,6 +23,16 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
     $scope.bitmapMode = false;
 
     $scope.codeSize = 0;
+    
+    window.addEventListener('keydown', function(e) {
+        if (e.target != document.body) {
+            return;
+        }
+        
+        if(e.key == "ArrowDown" || e.key == " ") {
+            e.preventDefault();
+        }
+    });
 
     $scope.code = "";
     function shouldHighlightLines() {
@@ -32,6 +42,7 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
     $scope.reset = function () {
         cpu.reset();
         memory.reset();
+        $scope.stop();
         $scope.error = '';
         $scope.selectedLine = -1;
         $scope.mapping = {};

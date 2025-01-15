@@ -222,6 +222,7 @@ var app = angular.module('ASMSimulator', []);
                                     opCode = opcodes.NOP;
                                     code.push(opCode);
                                     break;
+                                case 'HLT':
                                 case 'HALT':
                                     checkNoExtraArg('HALT', match[op1_group]);
                                     opCode = opcodes.HALT;
@@ -1648,6 +1649,16 @@ var app = angular.module('ASMSimulator', []);
     $scope.bitmapMode = false;
 
     $scope.codeSize = 0;
+    
+    window.addEventListener('keydown', function(e) {
+        if (e.target != document.body) {
+            return;
+        }
+        
+        if(e.key == "ArrowDown" || e.key == " ") {
+            e.preventDefault();
+        }
+    });
 
     $scope.code = "";
     function shouldHighlightLines() {
@@ -1657,6 +1668,7 @@ var app = angular.module('ASMSimulator', []);
     $scope.reset = function () {
         cpu.reset();
         memory.reset();
+        $scope.stop();
         $scope.error = '';
         $scope.selectedLine = -1;
         $scope.mapping = {};
