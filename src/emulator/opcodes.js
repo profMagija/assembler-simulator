@@ -1,6 +1,6 @@
-app.service('opcodes', [function() {
+app.service('opcodes', [function () {
     var opcodes = {
-        NONE: 0,
+        NOP: 0,
         MOV_REG_TO_REG: 1,
         MOV_ADDRESS_TO_REG: 2,
         MOV_REGADDRESS_TO_REG: 3,
@@ -74,10 +74,19 @@ app.service('opcodes', [function() {
         SHR_REGADDRESS_WITH_REG: 95,
         SHR_ADDRESS_WITH_REG: 96,
         SHR_NUMBER_WITH_REG: 97,
-        RND_REG: 98,
-        IN_REG_PORT: 99,
-        OUT_PORT_REG: 100,
-        OUT_PORT_NUMBER: 101,
+        ROL_REG_WITH_REG: 98,
+        ROL_REGADDRESS_WITH_REG: 99,
+        ROL_ADDRESS_WITH_REG: 100,
+        ROL_NUMBER_WITH_REG: 101,
+        ROR_REG_WITH_REG: 102,
+        ROR_REGADDRESS_WITH_REG: 103,
+        ROR_ADDRESS_WITH_REG: 104,
+        ROR_NUMBER_WITH_REG: 105,
+        RND_REG: 106,
+        IN_REG_PORT: 107,
+        OUT_PORT_REG: 108,
+        OUT_PORT_NUMBER: 109,
+        HALT: 110,
     };
 
     return opcodes;

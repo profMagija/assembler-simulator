@@ -4,26 +4,27 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
     $scope.error = '';
     $scope.isRunning = false;
     $scope.displayHex = true;
-    $scope.displayInstr = true;
+    $scope.displayInstr = false;
     $scope.displayA = false;
     $scope.displayB = false;
     $scope.displayC = false;
     $scope.displayD = false;
     $scope.speeds = [
         { speed: 1, desc: "1 Hz" },
-        { speed: 4, desc: "4 Hz" },
-        { speed: 8, desc: "8 Hz" },
-        { speed: 16, desc: "16 Hz" },
-        { speed: Infinity, desc: "Turbo" }
+        { speed: 2, desc: "2 Hz" },
+        { speed: 5, desc: "5 Hz" },
+        { speed: 10, desc: "10 Hz" },
+        { speed: 50, desc: "50 Hz" },
+        { speed: 100, desc: "100 Hz" },
+        { speed: Infinity, desc: "Turbo" },
     ];
-    $scope.speed = 4;
+    $scope.speed = 10;
     $scope.outputStartIndex = 240;
     $scope.bitmapMode = false;
 
     $scope.codeSize = 0;
 
-    $scope.code = "; Simple example\n; Writes Hello World to the output\n\n	JMP start\nhello: DB \"Hello World!\" ; Variable\n       DB 0	; String terminator\n\nstart:\n	MOV C, hello    ; Point to var \n	MOV D, 240	; Point to output\n	CALL print\n        HLT             ; Stop execution\n\nprint:			; print(C:*from, D:*to)\n	PUSH A\n	PUSH B\n	MOV B, 0\n.loop:\n	MOV A, [C]	; Get char from var\n	MOV [D], A	; Write to output\n	INC C\n	INC D  \n	CMP B, [C]	; Check if end\n	JNZ .loop	; jump if not\n\n	POP B\n	POP A\n	RET";
-
+    $scope.code = "";
     function shouldHighlightLines() {
         return !$scope.isRunning;
     }
@@ -39,10 +40,6 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
     };
 
     $scope.executeStep = function () {
-        if (!$scope.checkPrgrmLoaded()) {
-            $scope.assemble();
-        }
-
         try {
             // Execute
             var res = cpu.step();
@@ -62,10 +59,6 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
 
     var runner;
     $scope.run = function () {
-        if (!$scope.checkPrgrmLoaded()) {
-            $scope.assemble();
-        }
-
         $scope.isRunning = true;
         runner = $timeout(function () {
             if ($scope.executeStep() === true) {
@@ -96,12 +89,19 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
     };
 
     $scope.curVideoMode = function () {
-        return $scope.bitmapMode ? "Bitmap" : "Text";
+        return $scope.bitmapMode ? "Dot-Matrix" : "Character";
+    };
+    
+    $scope.getCharClass = function (value) {
+        return value < 128 ? "output-normal" : "output-inverted";
     };
 
     $scope.getChar = function (value) {
         var HIGH = " ░▒▓█▀▄◼◻●○◀▶▼▲▪";
         var text;
+        if (value >= 128) {
+            value -= 128;
+        }
         if (value >= 32) {
             text = String.fromCharCode(value);
         } else {

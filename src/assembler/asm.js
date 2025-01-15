@@ -216,12 +216,16 @@ app.service('assembler', ['opcodes', function (opcodes) {
                                         throw "DB does not support this operand";
 
                                     break;
-                                case 'HLT':
-                                    checkNoExtraArg('HLT', match[op1_group]);
-                                    opCode = opcodes.NONE;
+                                case 'NOP':
+                                    checkNoExtraArg('NOP', match[op1_group]);
+                                    opCode = opcodes.NOP;
                                     code.push(opCode);
                                     break;
-
+                                case 'HALT':
+                                    checkNoExtraArg('HALT', match[op1_group]);
+                                    opCode = opcodes.HALT;
+                                    code.push(opCode);
+                                    break;
                                 case 'LD':
                                 case 'MOV':
                                     p1 = getValue(match[op1_group]);
@@ -603,7 +607,40 @@ app.service('assembler', ['opcodes', function (opcodes) {
 
                                     code.push(opCode, p1.value, p2.value);
                                     break;
+                                case 'ROL':
+                                    p1 = getValue(match[op1_group]);
+                                    p2 = getValue(match[op2_group]);
 
+                                    if (p1.type === "register" && p2.type === "register")
+                                        opCode = opcodes.ROL_REG_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "regaddress")
+                                        opCode = opcodes.ROL_REGADDRESS_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "address")
+                                        opCode = opcodes.ROL_ADDRESS_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "number")
+                                        opCode = opcodes.ROL_NUMBER_WITH_REG;
+                                    else
+                                        throw instr + " does not support this operands";
+
+                                    code.push(opCode, p1.value, p2.value);
+                                    break;
+                                case 'ROR':
+                                    p1 = getValue(match[op1_group]);
+                                    p2 = getValue(match[op2_group]);
+
+                                    if (p1.type === "register" && p2.type === "register")
+                                        opCode = opcodes.ROR_REG_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "regaddress")
+                                        opCode = opcodes.ROR_REGADDRESS_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "address")
+                                        opCode = opcodes.ROR_ADDRESS_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "number")
+                                        opCode = opcodes.ROR_NUMBER_WITH_REG;
+                                    else
+                                        throw instr + " does not support this operands";
+
+                                    code.push(opCode, p1.value, p2.value);
+                                    break;
                                 case 'RND':
                                     p1 = getValue(match[op1_group]);
                                     checkNoExtraArg('RND', match[op2_group]);

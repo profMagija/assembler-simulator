@@ -217,12 +217,16 @@ var app = angular.module('ASMSimulator', []);
                                         throw "DB does not support this operand";
 
                                     break;
-                                case 'HLT':
-                                    checkNoExtraArg('HLT', match[op1_group]);
-                                    opCode = opcodes.NONE;
+                                case 'NOP':
+                                    checkNoExtraArg('NOP', match[op1_group]);
+                                    opCode = opcodes.NOP;
                                     code.push(opCode);
                                     break;
-
+                                case 'HALT':
+                                    checkNoExtraArg('HALT', match[op1_group]);
+                                    opCode = opcodes.HALT;
+                                    code.push(opCode);
+                                    break;
                                 case 'LD':
                                 case 'MOV':
                                     p1 = getValue(match[op1_group]);
@@ -604,7 +608,40 @@ var app = angular.module('ASMSimulator', []);
 
                                     code.push(opCode, p1.value, p2.value);
                                     break;
+                                case 'ROL':
+                                    p1 = getValue(match[op1_group]);
+                                    p2 = getValue(match[op2_group]);
 
+                                    if (p1.type === "register" && p2.type === "register")
+                                        opCode = opcodes.ROL_REG_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "regaddress")
+                                        opCode = opcodes.ROL_REGADDRESS_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "address")
+                                        opCode = opcodes.ROL_ADDRESS_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "number")
+                                        opCode = opcodes.ROL_NUMBER_WITH_REG;
+                                    else
+                                        throw instr + " does not support this operands";
+
+                                    code.push(opCode, p1.value, p2.value);
+                                    break;
+                                case 'ROR':
+                                    p1 = getValue(match[op1_group]);
+                                    p2 = getValue(match[op2_group]);
+
+                                    if (p1.type === "register" && p2.type === "register")
+                                        opCode = opcodes.ROR_REG_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "regaddress")
+                                        opCode = opcodes.ROR_REGADDRESS_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "address")
+                                        opCode = opcodes.ROR_ADDRESS_WITH_REG;
+                                    else if (p1.type === "register" && p2.type === "number")
+                                        opCode = opcodes.ROR_NUMBER_WITH_REG;
+                                    else
+                                        throw instr + " does not support this operands";
+
+                                    code.push(opCode, p1.value, p2.value);
+                                    break;
                                 case 'RND':
                                     p1 = getValue(match[op1_group]);
                                     checkNoExtraArg('RND', match[op2_group]);
@@ -744,14 +781,83 @@ var app = angular.module('ASMSimulator', []);
                     if (value >= 256) {
                         self.carry = true;
                         value = value % 256;
-                    } else if (value === 0) {
-                        self.zero = true;
                     } else if (value < 0) {
                         self.carry = true;
                         value = 256 - (-value) % 256;
                     }
 
+                    if (value === 0) {
+                        self.zero = true;
+                    }
+
                     return value;
+                };
+                
+                var shiftLeft = function (value, shift) {
+                    if (shift === 0) {
+                        self.carry = false;
+                        self.zero = false;
+                        return value;
+                    }
+                    
+                    if (shift > 8) {
+                        self.carry = false;
+                        self.zero = false;
+                        return 0;
+                    }
+                    
+                    var result = value << shift;
+                    self.carry = (result & 0x100) !== 0;
+                    result &= 0xFF;
+                    self.zero = result === 0;
+                    return result;
+                };
+                
+                var shiftRight = function (value, shift) {
+                    if (shift === 0) {
+                        self.carry = false;
+                        self.zero = false;
+                        return value;
+                    }
+                    
+                    if (shift > 8) {
+                        self.carry = false;
+                        self.zero = false;
+                        return 0;
+                    }
+                    
+                    var result = value >> shift;
+                    self.carry = (value & (1 << (shift - 1))) !== 0;
+                    self.zero = result === 0;
+                    return result;
+                };
+
+                var rotateLeft = function (value, shift) {
+                    if (shift === 0) {
+                        self.carry = false;
+                        self.zero = false;
+                        return value;
+                    }
+
+                    shift = shift % 8;
+                    var result = ((value << shift) & 0xFF) | (value >> (8 - shift));
+                    self.carry = (result & 1) !== 0;
+                    self.zero = result === 0;
+                    return result;
+                };
+
+                var rotateRight = function (value, shift) {
+                    if (shift === 0) {
+                        self.carry = false;
+                        self.zero = false;
+                        return value;
+                    }
+
+                    shift = shift % 8;
+                    var result = (value >> shift) | ((value << (8 - shift)) & 0xFF);
+                    self.carry = (result & 0x80) !== 0;
+                    self.zero = result === 0;
+                    return result;
                 };
 
                 var jump = function (newIP) {
@@ -786,8 +892,9 @@ var app = angular.module('ASMSimulator', []);
                 var regTo, regFrom, memFrom, memTo, number;
                 var instr = memory.load(self.ip);
                 switch (instr) {
-                    case opcodes.NONE:
-                        return false; // Abort step
+                    case opcodes.NOP:
+                        self.ip++;
+                        break;
                     case opcodes.MOV_REG_TO_REG:
                         regTo = checkGPR_SP(memory.load(++self.ip));
                         regFrom = checkGPR_SP(memory.load(++self.ip));
@@ -1180,49 +1287,97 @@ var app = angular.module('ASMSimulator', []);
                     case opcodes.SHL_REG_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         regFrom = checkGPR(memory.load(++self.ip));
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] << self.gpr[regFrom]);
+                        self.gpr[regTo] = shiftLeft(self.gpr[regTo], self.gpr[regFrom]);
                         self.ip++;
                         break;
                     case opcodes.SHL_REGADDRESS_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         regFrom = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] << memory.load(indirectRegisterAddress(regFrom)));
+                        self.gpr[regTo] = shiftLeft(self.gpr[regTo], memory.load(indirectRegisterAddress(regFrom)));
                         self.ip++;
                         break;
                     case opcodes.SHL_ADDRESS_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         memFrom = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] << memory.load(memFrom));
+                        self.gpr[regTo] = shiftLeft(self.gpr[regTo], memory.load(memFrom));
                         self.ip++;
                         break;
                     case opcodes.SHL_NUMBER_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         number = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] << number);
+                        self.gpr[regTo] = shiftLeft(self.gpr[regTo], number);
                         self.ip++;
                         break;
                     case opcodes.SHR_REG_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         regFrom = checkGPR(memory.load(++self.ip));
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] >>> self.gpr[regFrom]);
+                        self.gpr[regTo] = shiftRight(self.gpr[regTo], self.gpr[regFrom]);
                         self.ip++;
                         break;
                     case opcodes.SHR_REGADDRESS_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         regFrom = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] >>> memory.load(indirectRegisterAddress(regFrom)));
+                        self.gpr[regTo] = shiftRight(self.gpr[regTo], memory.load(indirectRegisterAddress(regFrom)));
                         self.ip++;
                         break;
                     case opcodes.SHR_ADDRESS_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         memFrom = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] >>> memory.load(memFrom));
+                        self.gpr[regTo] = shiftRight(self.gpr[regTo], memory.load(memFrom));
                         self.ip++;
                         break;
                     case opcodes.SHR_NUMBER_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         number = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] >>> number);
+                        self.gpr[regTo] = shiftRight(self.gpr[regTo], number);
+                        self.ip++;
+                        break;
+                    case opcodes.ROL_REG_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        regFrom = checkGPR(memory.load(++self.ip));
+                        self.gpr[regTo] = rotateLeft(self.gpr[regTo], self.gpr[regFrom]);
+                        self.ip++;
+                        break;
+                    case opcodes.ROL_REGADDRESS_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        regFrom = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateLeft(self.gpr[regTo], memory.load(indirectRegisterAddress(regFrom)));
+                        self.ip++;
+                        break;
+                    case opcodes.ROL_ADDRESS_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        memFrom = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateLeft(self.gpr[regTo], memory.load(memFrom));
+                        self.ip++;
+                        break;
+                    case opcodes.ROL_NUMBER_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        number = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateLeft(self.gpr[regTo], number);
+                        self.ip++;
+                        break;
+                    case opcodes.ROR_REG_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        regFrom = checkGPR(memory.load(++self.ip));
+                        self.gpr[regTo] = rotateRight(self.gpr[regTo], self.gpr[regFrom]);
+                        self.ip++;
+                        break;
+                    case opcodes.ROR_REGADDRESS_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        regFrom = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateRight(self.gpr[regTo], memory.load(indirectRegisterAddress(regFrom)));
+                        self.ip++;
+                        break;
+                    case opcodes.ROR_ADDRESS_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        memFrom = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateRight(self.gpr[regTo], memory.load(memFrom));
+                        self.ip++;
+                        break;
+                    case opcodes.ROR_NUMBER_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        number = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateRight(self.gpr[regTo], number);
                         self.ip++;
                         break;
                     case opcodes.RND_REG:
@@ -1248,6 +1403,8 @@ var app = angular.module('ASMSimulator', []);
                         io.write_to_port(portTo, value);
                         self.ip++;
                         break;
+                    case opcodes.HALT:
+                        return false;
                     default:
                         throw "Invalid op code: " + instr;
                 }
@@ -1373,9 +1530,9 @@ var app = angular.module('ASMSimulator', []);
     memory.reset();
     return memory;
 }]);
-;app.service('opcodes', [function() {
+;app.service('opcodes', [function () {
     var opcodes = {
-        NONE: 0,
+        NOP: 0,
         MOV_REG_TO_REG: 1,
         MOV_ADDRESS_TO_REG: 2,
         MOV_REGADDRESS_TO_REG: 3,
@@ -1449,10 +1606,19 @@ var app = angular.module('ASMSimulator', []);
         SHR_REGADDRESS_WITH_REG: 95,
         SHR_ADDRESS_WITH_REG: 96,
         SHR_NUMBER_WITH_REG: 97,
-        RND_REG: 98,
-        IN_REG_PORT: 99,
-        OUT_PORT_REG: 100,
-        OUT_PORT_NUMBER: 101,
+        ROL_REG_WITH_REG: 98,
+        ROL_REGADDRESS_WITH_REG: 99,
+        ROL_ADDRESS_WITH_REG: 100,
+        ROL_NUMBER_WITH_REG: 101,
+        ROR_REG_WITH_REG: 102,
+        ROR_REGADDRESS_WITH_REG: 103,
+        ROR_ADDRESS_WITH_REG: 104,
+        ROR_NUMBER_WITH_REG: 105,
+        RND_REG: 106,
+        IN_REG_PORT: 107,
+        OUT_PORT_REG: 108,
+        OUT_PORT_NUMBER: 109,
+        HALT: 110,
     };
 
     return opcodes;
@@ -1463,24 +1629,27 @@ var app = angular.module('ASMSimulator', []);
     $scope.error = '';
     $scope.isRunning = false;
     $scope.displayHex = true;
-    $scope.displayInstr = true;
+    $scope.displayInstr = false;
     $scope.displayA = false;
     $scope.displayB = false;
     $scope.displayC = false;
     $scope.displayD = false;
-    $scope.speeds = [{ speed: 1, desc: "1 Hz" },
-    { speed: 4, desc: "4 Hz" },
-    { speed: 8, desc: "8 Hz" },
-    { speed: 16, desc: "16 Hz" },
-    { speed: Infinity, desc: "Turbo" }];
-    $scope.speed = 4;
+    $scope.speeds = [
+        { speed: 1, desc: "1 Hz" },
+        { speed: 2, desc: "2 Hz" },
+        { speed: 5, desc: "5 Hz" },
+        { speed: 10, desc: "10 Hz" },
+        { speed: 50, desc: "50 Hz" },
+        { speed: 100, desc: "100 Hz" },
+        { speed: Infinity, desc: "Turbo" },
+    ];
+    $scope.speed = 10;
     $scope.outputStartIndex = 240;
     $scope.bitmapMode = false;
 
     $scope.codeSize = 0;
 
-    $scope.code = "; Simple example\n; Writes Hello World to the output\n\n	JMP start\nhello: DB \"Hello World!\" ; Variable\n       DB 0	; String terminator\n\nstart:\n	MOV C, hello    ; Point to var \n	MOV D, 240	; Point to output\n	CALL print\n        HLT             ; Stop execution\n\nprint:			; print(C:*from, D:*to)\n	PUSH A\n	PUSH B\n	MOV B, 0\n.loop:\n	MOV A, [C]	; Get char from var\n	MOV [D], A	; Write to output\n	INC C\n	INC D  \n	CMP B, [C]	; Check if end\n	JNZ .loop	; jump if not\n\n	POP B\n	POP A\n	RET";
-
+    $scope.code = "";
     function shouldHighlightLines() {
         return !$scope.isRunning;
     }
@@ -1496,10 +1665,6 @@ var app = angular.module('ASMSimulator', []);
     };
 
     $scope.executeStep = function () {
-        if (!$scope.checkPrgrmLoaded()) {
-            $scope.assemble();
-        }
-
         try {
             // Execute
             var res = cpu.step();
@@ -1519,10 +1684,6 @@ var app = angular.module('ASMSimulator', []);
 
     var runner;
     $scope.run = function () {
-        if (!$scope.checkPrgrmLoaded()) {
-            $scope.assemble();
-        }
-
         $scope.isRunning = true;
         runner = $timeout(function () {
             if ($scope.executeStep() === true) {
@@ -1553,12 +1714,19 @@ var app = angular.module('ASMSimulator', []);
     };
 
     $scope.curVideoMode = function () {
-        return $scope.bitmapMode ? "Bitmap" : "Text";
+        return $scope.bitmapMode ? "Dot-Matrix" : "Character";
+    };
+    
+    $scope.getCharClass = function (value) {
+        return value < 128 ? "output-normal" : "output-inverted";
     };
 
     $scope.getChar = function (value) {
         var HIGH = " ░▒▓█▀▄◼◻●○◀▶▼▲▪";
         var text;
+        if (value >= 128) {
+            value -= 128;
+        }
         if (value >= 32) {
             text = String.fromCharCode(value);
         } else {

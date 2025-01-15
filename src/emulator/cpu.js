@@ -69,14 +69,83 @@ app.service('cpu', ['opcodes', 'memory', 'io', function (opcodes, memory, io) {
                     if (value >= 256) {
                         self.carry = true;
                         value = value % 256;
-                    } else if (value === 0) {
-                        self.zero = true;
                     } else if (value < 0) {
                         self.carry = true;
                         value = 256 - (-value) % 256;
                     }
 
+                    if (value === 0) {
+                        self.zero = true;
+                    }
+
                     return value;
+                };
+                
+                var shiftLeft = function (value, shift) {
+                    if (shift === 0) {
+                        self.carry = false;
+                        self.zero = false;
+                        return value;
+                    }
+                    
+                    if (shift > 8) {
+                        self.carry = false;
+                        self.zero = false;
+                        return 0;
+                    }
+                    
+                    var result = value << shift;
+                    self.carry = (result & 0x100) !== 0;
+                    result &= 0xFF;
+                    self.zero = result === 0;
+                    return result;
+                };
+                
+                var shiftRight = function (value, shift) {
+                    if (shift === 0) {
+                        self.carry = false;
+                        self.zero = false;
+                        return value;
+                    }
+                    
+                    if (shift > 8) {
+                        self.carry = false;
+                        self.zero = false;
+                        return 0;
+                    }
+                    
+                    var result = value >> shift;
+                    self.carry = (value & (1 << (shift - 1))) !== 0;
+                    self.zero = result === 0;
+                    return result;
+                };
+
+                var rotateLeft = function (value, shift) {
+                    if (shift === 0) {
+                        self.carry = false;
+                        self.zero = false;
+                        return value;
+                    }
+
+                    shift = shift % 8;
+                    var result = ((value << shift) & 0xFF) | (value >> (8 - shift));
+                    self.carry = (result & 1) !== 0;
+                    self.zero = result === 0;
+                    return result;
+                };
+
+                var rotateRight = function (value, shift) {
+                    if (shift === 0) {
+                        self.carry = false;
+                        self.zero = false;
+                        return value;
+                    }
+
+                    shift = shift % 8;
+                    var result = (value >> shift) | ((value << (8 - shift)) & 0xFF);
+                    self.carry = (result & 0x80) !== 0;
+                    self.zero = result === 0;
+                    return result;
                 };
 
                 var jump = function (newIP) {
@@ -111,8 +180,9 @@ app.service('cpu', ['opcodes', 'memory', 'io', function (opcodes, memory, io) {
                 var regTo, regFrom, memFrom, memTo, number;
                 var instr = memory.load(self.ip);
                 switch (instr) {
-                    case opcodes.NONE:
-                        return false; // Abort step
+                    case opcodes.NOP:
+                        self.ip++;
+                        break;
                     case opcodes.MOV_REG_TO_REG:
                         regTo = checkGPR_SP(memory.load(++self.ip));
                         regFrom = checkGPR_SP(memory.load(++self.ip));
@@ -505,49 +575,97 @@ app.service('cpu', ['opcodes', 'memory', 'io', function (opcodes, memory, io) {
                     case opcodes.SHL_REG_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         regFrom = checkGPR(memory.load(++self.ip));
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] << self.gpr[regFrom]);
+                        self.gpr[regTo] = shiftLeft(self.gpr[regTo], self.gpr[regFrom]);
                         self.ip++;
                         break;
                     case opcodes.SHL_REGADDRESS_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         regFrom = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] << memory.load(indirectRegisterAddress(regFrom)));
+                        self.gpr[regTo] = shiftLeft(self.gpr[regTo], memory.load(indirectRegisterAddress(regFrom)));
                         self.ip++;
                         break;
                     case opcodes.SHL_ADDRESS_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         memFrom = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] << memory.load(memFrom));
+                        self.gpr[regTo] = shiftLeft(self.gpr[regTo], memory.load(memFrom));
                         self.ip++;
                         break;
                     case opcodes.SHL_NUMBER_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         number = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] << number);
+                        self.gpr[regTo] = shiftLeft(self.gpr[regTo], number);
                         self.ip++;
                         break;
                     case opcodes.SHR_REG_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         regFrom = checkGPR(memory.load(++self.ip));
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] >>> self.gpr[regFrom]);
+                        self.gpr[regTo] = shiftRight(self.gpr[regTo], self.gpr[regFrom]);
                         self.ip++;
                         break;
                     case opcodes.SHR_REGADDRESS_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         regFrom = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] >>> memory.load(indirectRegisterAddress(regFrom)));
+                        self.gpr[regTo] = shiftRight(self.gpr[regTo], memory.load(indirectRegisterAddress(regFrom)));
                         self.ip++;
                         break;
                     case opcodes.SHR_ADDRESS_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         memFrom = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] >>> memory.load(memFrom));
+                        self.gpr[regTo] = shiftRight(self.gpr[regTo], memory.load(memFrom));
                         self.ip++;
                         break;
                     case opcodes.SHR_NUMBER_WITH_REG:
                         regTo = checkGPR(memory.load(++self.ip));
                         number = memory.load(++self.ip);
-                        self.gpr[regTo] = checkOperation(self.gpr[regTo] >>> number);
+                        self.gpr[regTo] = shiftRight(self.gpr[regTo], number);
+                        self.ip++;
+                        break;
+                    case opcodes.ROL_REG_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        regFrom = checkGPR(memory.load(++self.ip));
+                        self.gpr[regTo] = rotateLeft(self.gpr[regTo], self.gpr[regFrom]);
+                        self.ip++;
+                        break;
+                    case opcodes.ROL_REGADDRESS_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        regFrom = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateLeft(self.gpr[regTo], memory.load(indirectRegisterAddress(regFrom)));
+                        self.ip++;
+                        break;
+                    case opcodes.ROL_ADDRESS_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        memFrom = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateLeft(self.gpr[regTo], memory.load(memFrom));
+                        self.ip++;
+                        break;
+                    case opcodes.ROL_NUMBER_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        number = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateLeft(self.gpr[regTo], number);
+                        self.ip++;
+                        break;
+                    case opcodes.ROR_REG_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        regFrom = checkGPR(memory.load(++self.ip));
+                        self.gpr[regTo] = rotateRight(self.gpr[regTo], self.gpr[regFrom]);
+                        self.ip++;
+                        break;
+                    case opcodes.ROR_REGADDRESS_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        regFrom = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateRight(self.gpr[regTo], memory.load(indirectRegisterAddress(regFrom)));
+                        self.ip++;
+                        break;
+                    case opcodes.ROR_ADDRESS_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        memFrom = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateRight(self.gpr[regTo], memory.load(memFrom));
+                        self.ip++;
+                        break;
+                    case opcodes.ROR_NUMBER_WITH_REG:
+                        regTo = checkGPR(memory.load(++self.ip));
+                        number = memory.load(++self.ip);
+                        self.gpr[regTo] = rotateRight(self.gpr[regTo], number);
                         self.ip++;
                         break;
                     case opcodes.RND_REG:
@@ -573,6 +691,8 @@ app.service('cpu', ['opcodes', 'memory', 'io', function (opcodes, memory, io) {
                         io.write_to_port(portTo, value);
                         self.ip++;
                         break;
+                    case opcodes.HALT:
+                        return false;
                     default:
                         throw "Invalid op code: " + instr;
                 }

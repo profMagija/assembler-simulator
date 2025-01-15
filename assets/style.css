@@ -6,9 +6,17 @@
     text-align: center;
 }
 
-.output, .output-bg, .bitmap-output-col {
+.output, .bitmap-output-col {
     display: inline-block;
+}
+
+.output-normal, .output-bg {
     background-color: #DFDFDF;
+}
+
+.output-inverted {
+    color: #DFDFDF;
+    background-color: #000000;
 }
 
 .output {
@@ -23,11 +31,12 @@
     display: block;
     text-wrap: nowrap;
     margin-bottom: 2px;
+    height: 1.2em;
 }
 
 .bitmap-output-col {
-    width: 1.5em;
-    height: 1.5em;
+    width: 1.2em;
+    height: 1.2em;
     margin-right: 2px;
 }
 
@@ -64,42 +73,54 @@
 }
 
 .marker-base {
-    width: 1.8em;
+    width: 2.2em;
     border-radius: 2px;
 }
 
 .marker {
-    color: #FFF;
+    color: #000;
 }
 
 .marker-ip {
-    background-color: #606060;
+    background-color: #c0c0c0;
 }
 
 .marker-sp {
-    background-color: #606060;
+    background-color: #c0c0c0;
 }
 
 .marker-a {
-    background-color: #4D8C20;
+    background-color: #9cd375;
 }
 
 .marker-b {
-	background-color: #428BCA;
+	background-color: #96b9d8;
 }
 
 .marker-c {
-	background-color: #A137ED;
+	background-color: #c999eb;
 }
 
 .marker-d {
-	background-color: #EEA236;
+	background-color: #dfad67;
 }
 
 .marker-f {
-	background-color: #E81F1F;
+	background-color: #de6d6d;
 }
 
 .codelabel-line a {
     cursor: pointer;
+}
+
+.panel-heading {
+    padding: 5px 15px !important;
+}
+
+.btn {
+    padding: 3px 12px !important;
+}
+
+.table-condensed > tbody > tr > td {
+    padding: 5px 0 !important;
 }
