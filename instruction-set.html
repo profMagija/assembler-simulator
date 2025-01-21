@@ -265,27 +265,27 @@ ROR reg, constant
         <pre>RET
 </pre>
         <h3>Stack instructions</h3>
-        <b>PUSH - Push to stack</b>
+        <b>Push to stack</b>
         <p>Pushes a value to the stack. The stack grows down and the current position is available in the stack pointer
             register (SP). This instruction will decrease the SP.</p>
         <pre>PUSH reg
 PUSH address
 PUSH constant
 </pre>
-        <b>POP - Pop from stack</b>
+        <b>Pop from stack</b>
         <p>Pops a value from the stack to a register. This instruction will increase the SP.</p>
         <pre>POP reg
 </pre>
         <h3>Other instructions</h3>
-        <b>RND - Random</b>
+        <b>Random numbers generator</b>
         <p>Loads a random value to the specified register.</p>
         <pre>RND reg
 </pre>
-        <b>NOP - No operation</b>
+        <b>No operation</b>
         <p>Increments IP and does nothing.</p>
         <pre>NOP
 </pre>
-        <b>HLT - Stops the processor</b>
+        <b>Stop the processor</b>
         <p>Stops operation of the processor. Hit Reset button to reset IP before restarting.
             The alternative syntax is HALT.</p>
         <pre>HLT
