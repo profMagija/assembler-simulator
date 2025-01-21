@@ -1649,16 +1649,6 @@ var app = angular.module('ASMSimulator', []);
     $scope.bitmapMode = false;
 
     $scope.codeSize = 0;
-    
-    window.addEventListener('keydown', function(e) {
-        if (e.target != document.body) {
-            return;
-        }
-        
-        if(e.key == "ArrowDown" || e.key == " ") {
-            e.preventDefault();
-        }
-    });
 
     $scope.code = "";
     function shouldHighlightLines() {
