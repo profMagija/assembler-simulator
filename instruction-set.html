@@ -23,29 +23,26 @@
         </div>
     </nav>
     <div class="container">
-        <h4>Introduction</h4>
-        <p>This simulator provides a simplified assembler syntax (based on <a href="http://www.nasm.us"
+        <h3>Introduction</h3>
+        <p>This simulator provides a simplified assembler syntax (based on <a href="http://www.nasm.us/"
                 target="_blank">NASM</a>) and is simulating a x86 like cpu. In depth documentation and introduction to
             assembler can be found on the following websites:</p>
         <ul>
-            <li><a href="http://en.wikipedia.org/wiki/Assembly_language" target="_blank">Assembly - Wikipedia</a></li>
-            <li><a href="http://cs.smith.edu/~thiebaut/ArtOfAssembly/artofasm.html" target="_blank">The Art of Assembly
-                    Language Programming</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Assembly_language" target="_blank">Assembly - Wikipedia</a></li>
             <li><a href="http://www.nasm.us/xdoc/2.10.09/html/nasmdoc3.html" target="_blank">NASM Language
                     Documentation</a></li>
         </ul>
         <p>The simulator consists of a 8-bit cpu and 256 bytes of memory. All instructions (code) and variables (data)
             needs to fit inside the memory. For simplicity every instruction (and operand) is 1 byte. Therefore a MOV
             instruction will use 3 bytes of memory. The simulator provides a console output which is memory mapped from
-            0xE8 to 0xFF. Memory mapped means that every value written to this memory block is visible on the console.
+            0xF0 to 0xFF. Memory mapped means that every value written to this memory block is visible on the console.
         </p>
-        <h4>Syntax</h4>
+        <h3>Syntax</h3>
         <p>The syntax is similar as most assemblers are using. Every instruction must be on their own line. Labels are
             optional and must either start with a letter or a dot (.) and end with a colon.</p>
         <pre>label: instruction operands	; Comment</pre>
         <p>Valid number formats for constants are:</p>
-        <pre>
-Decimal: 200
+        <pre>Decimal: 200
 Decimal: 200d
 Hex: 0xA4
 Octal: 0o48
@@ -53,17 +50,20 @@ Binary: 101b
 </pre>
         <p>It is possible to define a number using a character or multiple numbers (see instruction <i>DB</i>) by using
             a string.</p>
-        <pre>
-Character: 'A'
-String: "Hello World!"
+        <pre>Character: 'A'
+String: "Hello World!" (only in DB)
+</pre>
+        <p>Assembler directive DB (define byte) reserves space in memory for a byte or a character string for later use
+            as memory constants or space for memory variables.
+            A value parameter can either be a single number, a character or a string.</p>
+        <pre>DB value
 </pre>
         <p>Operands can either be one of the four general purpose registers, stack pointer register, a memory address or
             a constant.
             Stack pointer register can only be used as operand in MOV, ADD, SUB, CMP, INC and DEC instructions.
             Instead of defining an address as a constant or by using a register you can use labels. The assembler will
             then replace the label with the corresponding constant.</p>
-        <pre>
-General purpose (GP) register: A, B, C, D
+        <pre>General purpose (GP) register: A, B, C, D
 Stack pointer register: SP
 Address using a GP register: [A]
 Address using a GP register and offset: [D-3]
@@ -73,45 +73,44 @@ Address using a label: label
 Constant: Any number between 0..255 (8bit unsigned)
 Offset for indirect addressing: Integer between -16..+15 (sign is mandatory)
 </pre>
-        <h4>MOV - Copy a value</h4>
-        <p>Copies a value from <i>src</i> to <i>dest</i>. The MOV instruction is the only one able to directly modify
-            the memory. SP can be used as operand with MOV.</p>
-        <pre>
-MOV reg, reg
+        <h3>Moving data between two registers or registers and memory</h3>
+        <p>Copies a value to <i>dest</i> from <i>src</i> as <b>MOV dest, src</b>.
+            The MOV instruction is the only one able to directly modify the memory.
+            SP can be used as operand with MOV. The alternative syntax is load as <b>LD dest, src</b>, used in
+            assemblers for many microprocessors.</p>
+        <pre>MOV reg, reg
 MOV reg, address
 MOV reg, constant
 MOV address, reg
 MOV address, constant
 </pre>
-        <h4>DB - Variable</h4>
-        <p>Defines a variable. A variable can either be a single number, character or a string.</p>
-        <pre>
-DB constant
-</pre>
-        <h4>Math operations</h4>
+        <h3>Math operations</h3>
         <b>Addition and Subtraction</b>
         <p>Adds two numbers together or subtract one number form another. This operations will modify the carry and zero
-            flag. SP can be used as operand with ADD and SUB.</p>
-        <pre>
-ADD reg, reg
+            flag.
+            SP can be used as operand with <b>ADD</b> and <b>SUB</b>. Compare <b>CMP</b> instruction is effectively the
+            same as <b>SUB</b> with the same effect on
+            flags, while registers remain unchanged (result is not stored).</p>
+        <pre>ADD reg, reg
 ADD reg, address
 ADD reg, constant
 SUB reg, reg
 SUB reg, address
 SUB reg, constant
+CMP reg, reg
+CMP reg, address
+CMP reg, constant
 </pre>
         <b>Increment and Decrement</b>
         <p>Increments or decrements a register by one. This operations will modify the carry and zero flag. SP can be
-            used as operand with INC and DEC.</p>
-        <pre>
-INC reg
+            used as operand with <b>INC</b> and <b>DEC</b>.</p>
+        <pre>INC reg
 DEC reg
 </pre>
         <b>Multiplication and division</b>
         <p>Multiplies or divides the <i>A</i> register with the given value. This operations will modify the carry and
             zero flag.</p>
-        <pre>
-MUL reg
+        <pre>MUL reg
 MUL address
 MUL constant
 DIV reg
@@ -119,10 +118,9 @@ DIV address
 DIV constant
 </pre>
         <b>Logical instructions</b>
-        <p>The following logical instructions are supported: AND, OR, XOR, NOT. This operations will modify the carry
-            and zero flag.</p>
-        <pre>
-AND reg, reg
+        <p>Logical instructions manipulate individual bits in destination register. Operations will modify the carry and
+            zero flag.</p>
+        <pre>AND reg, reg
 AND reg, address
 AND reg, constant
 OR reg, reg
@@ -133,30 +131,28 @@ XOR reg, address
 XOR reg, constant
 NOT reg
 </pre>
-        <b>Shift instructions</b>
-        <p>The following shift instructions are supported: SHL/SAL and SHR/SAR. As this simulator only supports unsigned
-            numbers SHR and SAR yield the same result. This operations will modify the carry and zero flag.</p>
-        <pre>
-SHL reg, reg
+        <b>Shift and rotate instructions</b>
+        <p>Instructions shift and rotate bits in destination register by a specified number of positions, pushing the
+            the leftmost or the rightmost bit to carry flag.
+            As this simulator only supports unsigned numbers <b>SHR/SHL</b> yield the same result as <b>SAR/SAL</b>.
+            This operations will modify the carry and zero flag.</p>
+        <pre>SHL reg, reg
 SHL reg, address
 SHL reg, constant
 SHR reg, reg
 SHR reg, address
 SHR reg, constant
+ROL reg, reg
+ROL reg, address
+ROL reg, constant
+ROR reg, reg
+ROR reg, address
+ROR reg, constant
 </pre>
-        <h4>CMP - Compare</h4>
-        <p>Compares two values and sets the zero flag to true if they are equal. SP can be used as operand with CMP. Use
-            this instruction before a conditional jump.</p>
-        <pre>
-CMP reg, reg
-CMP reg, address
-CMP reg, constant
-</pre>
-        <h4>Jumps</h4>
-        <b>JMP - Unconditional jump</b>
+        <h3>Jumps</h3>
+        <b>Unconditional jump</b>
         <p>Let the instruction pointer do a unconditional jump to the defined address.</p>
-        <pre>
-JMP address
+        <pre>JMP address
 </pre>
         <b>Conditional jumps</b>
         <p>Let the instruction pointer do a conditional jump to the defined address. See the table below for the
@@ -198,13 +194,13 @@ JMP address
                 <tr>
                     <td>JA</td>
                     <td>&gt;</td>
-                    <td>Carry = FALSE && Zero = FALSE</td>
+                    <td>Carry = FALSE &amp;&amp; Zero = FALSE</td>
                     <td>JNBE</td>
                 </tr>
                 <tr>
                     <td>JNBE</td>
                     <td>not &lt;=</td>
-                    <td>Carry = FALSE && Zero = FALSE</td>
+                    <td>Carry = FALSE &amp;&amp; Zero = FALSE</td>
                     <td>JA</td>
                 </tr>
                 <tr>
@@ -257,39 +253,44 @@ JMP address
                 </tr>
             </tbody>
         </table>
-        <b>CALL - Function call</b>
+        <h3>Subroutines</h3>
+        <b>Call a subroutine</b>
         <p>Call can be used to jump into a subroutine (function). Pushes the instruction address of the next instruction
             to the stack and jumps to the specified address.</p>
-        <pre>
-CALL address
+        <pre>CALL address
 </pre>
-        <b>RET - Exit a subroutine</b>
-        <p>Exits a subroutines by popping the return address previously pushed by the CALL instruction. Make sure the SP
-            is balanced before calling RET otherwise the instruction pointer will have an ambiguous value.</p>
-        <pre>
-RET
+        <b>Return from a subroutine</b>
+        <p>Returns from a subroutine by popping the return address previously pushed by the CALL instruction. Make sure
+            the SP is balanced before calling RET otherwise the instruction pointer will have an ambiguous value.</p>
+        <pre>RET
 </pre>
-        <h4>Stack instructions</h4>
+        <h3>Stack instructions</h3>
         <b>PUSH - Push to stack</b>
         <p>Pushes a value to the stack. The stack grows down and the current position is available in the stack pointer
             register (SP). This instruction will decrease the SP.</p>
-        <pre>
-PUSH reg
+        <pre>PUSH reg
 PUSH address
 PUSH constant
 </pre>
         <b>POP - Pop from stack</b>
         <p>Pops a value from the stack to a register. This instruction will increase the SP.</p>
-        <pre>
-POP reg
+        <pre>POP reg
 </pre>
-        <h4>Other instructions</h4>
-        <b>HALT - Stops the processor.</b>
-        <p>Stops operation of the processor. Hit Reset button to reset IP before restarting.</p>
-        <pre>
-HALT
+        <h3>Other instructions</h3>
+        <b>RND - Random</b>
+        <p>Loads a random value to the specified register.</p>
+        <pre>RND reg
 </pre>
-        <hr style="margin-bottom:10px;" />
+        <b>NOP - No operation</b>
+        <p>Increments IP and does nothing.</p>
+        <pre>NOP
+</pre>
+        <b>HLT - Stops the processor</b>
+        <p>Stops operation of the processor. Hit Reset button to reset IP before restarting.
+            The alternative syntax is HALT.</p>
+        <pre>HLT
+</pre>
+        <hr style="margin-bottom:10px;">
         <p><small>by Marco Schweighauser (2015) | MIT License | <a
                     href="https://www.mschweighauser.com/make-your-own-assembler-simulator-in-javascript-part1/"
                     target="_blank">Blog</a></small></p>
