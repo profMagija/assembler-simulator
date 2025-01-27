@@ -153,6 +153,7 @@ ROR reg, constant
         <b>Unconditional jump</b>
         <p>Let the instruction pointer do a unconditional jump to the defined address.</p>
         <pre>JMP address
+JMP reg
 </pre>
         <b>Conditional jumps</b>
         <p>Let the instruction pointer do a conditional jump to the defined address. See the table below for the
@@ -258,6 +259,7 @@ ROR reg, constant
         <p>Call can be used to jump into a subroutine (function). Pushes the instruction address of the next instruction
             to the stack and jumps to the specified address.</p>
         <pre>CALL address
+CALL reg
 </pre>
         <b>Return from a subroutine</b>
         <p>Returns from a subroutine by popping the return address previously pushed by the CALL instruction. Make sure
@@ -286,7 +288,11 @@ PUSH constant
         <pre>NOP
 </pre>
         <b>Stop the processor</b>
-        <p>Stops operation of the processor. Hit Reset button to reset IP before restarting.
+        <p>Stops operation of the processor. Hitting Run will continue from the next instruction.</p>
+        <pre>STOP
+</pre>
+        <b>Halt the processor</b>
+        <p>Permanently stops operation of the processor. Hit Reset or Assemble button to reset the processor.
             The alternative syntax is HALT.</p>
         <pre>HLT
 </pre>
