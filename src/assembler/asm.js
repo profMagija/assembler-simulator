@@ -678,6 +678,12 @@ app.service('assembler', ['opcodes', function (opcodes) {
                                     code.push(opCode, p1.value, p2.value);
 
                                     break;
+                                case 'STOP':
+                                    checkNoExtraArg('STOP', match[op1_group]);
+                                    opCode = opcodes.STOP;
+                                    code.push(opCode);
+
+                                    break;
                                 default:
                                     throw "Invalid instruction: " + match[2];
                             }

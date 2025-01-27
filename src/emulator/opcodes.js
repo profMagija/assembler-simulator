@@ -86,7 +86,8 @@ app.service('opcodes', [function () {
         IN_REG_PORT: 107,
         OUT_PORT_REG: 108,
         OUT_PORT_NUMBER: 109,
-        HALT: 110,
+        STOP: 254,
+        HALT: 255,
     };
 
     return opcodes;

@@ -15,12 +15,14 @@
     <div class="container" style="margin-top: 20px;">
         <div class="alert alert-danger" ng-hide="error === ''">{{ error }}</div>
         <div class="row">
-            <div class="col-lg-7 col-md-6">
+            <div class="col-lg-7 col-md-6" ng-hide="minimalDisplay">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4 class="panel-title" style="display: flex;">
                             <span style="margin: auto 0;">Code <small>(<a href="./instruction-set.html" target="_blank"
                                         style="color: #337AB7">Instruction Set</a>)</small></span>
+                            <span style="flex-grow: 1;"></span>
+                            <span style="margin: auto 0;" ng-hide="!codeSize"><small>Code size: {{codeSize}}</small></span>
                             <span style="flex-grow: 1;"></span>
                             <button type="button" class="btn btn-default" ng-click="assemble()">Assemble</button>
                         </h4>
@@ -35,7 +37,7 @@
                 </div>
             </div>
             <div class="clearfix visible-xs visible-sm"></div>
-            <div class="col-lg-5 col-md-6">
+            <div class="{{ minimalDisplay ? 'col-lg-12 col-md-12' : 'col-lg-5 col-md-6' }}">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4 class="panel-title" style="display: flex;">
@@ -43,6 +45,9 @@
                             <span style="flex-grow: 1;"></span>
                             <button type="button" class="btn btn-default" ng-click="changeVideoMode()">
                                 {{ curVideoMode() }}
+                            </button>
+                            <button type="button" class="btn btn-default" ng-click="toggleMinimalDisplay()">
+                                {{ minimalDisplay ? '⊡' : '⊞' }}
                             </button>
                         </h4>
                     </div>
@@ -66,7 +71,7 @@
                         <h4 class="panel-title" style="display: flex;">
                             <span style="margin: auto 0;">CPU & Memory</span>
                             <span style="flex-grow: 1;"></span>
-                            <button type="button" class="btn btn-success btn-sm" ng-click="run()"
+                            <button type="button" class="btn btn-success btn-sm" ng-click="startRun()"
                                 ng-hide="isRunning"><span class="glyphicon glyphicon-play"></span> Run</button>
                             <button type="button" class="btn btn-default btn-sm" ng-click="stop()"
                                 ng-show="isRunning"><span class="glyphicon glyphicon-stop"></span> Stop</button>
@@ -76,8 +81,8 @@
                             <button type="button" class="btn btn-default btn-sm" ng-click="reset()">Reset</button>
                         </h4>
                     </div>
-                    <div class="panel-body">
-                        <table class="table table-condensed table-striped">
+                    <div class="panel-body" ng-hide="minimalDisplay">
+                        <table class="table table-condensed table-striped" ng-if="!minimalDislay">
                             <thead>
                                 <tr>
                                     <th style="text-align:center;">A</th>
@@ -190,7 +195,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel panel-default">
+                <div class="panel panel-default" ng-hide="minimalDisplay">
                     <div class="panel-heading">
                         <h4 class="panel-title">Labels</h4>
                     </div>

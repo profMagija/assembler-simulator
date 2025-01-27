@@ -24,6 +24,8 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
 
     $scope.codeSize = 0;
 
+    $scope.minimalDisplay = false;
+
     $scope.code = "";
     function shouldHighlightLines() {
         return !$scope.isRunning;
@@ -56,6 +58,14 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
             $scope.error = e;
             return false;
         }
+    };
+    
+    $scope.startRun = function () {
+        if ($scope.cpu.isHalted()) {
+            $scope.assemble();
+        }
+        
+        $scope.run();
     };
 
     var runner;
@@ -92,7 +102,7 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
     $scope.curVideoMode = function () {
         return $scope.bitmapMode ? "Dot-Matrix" : "Character";
     };
-    
+
     $scope.getCharClass = function (value) {
         return value < 128 ? "output-normal" : "output-inverted";
     };
@@ -192,5 +202,9 @@ app.controller('Ctrl', ['$document', '$scope', '$timeout', 'cpu', 'memory', 'ass
         } else {
             return '';
         }
+    };
+
+    $scope.toggleMinimalDisplay = function () {
+        $scope.minimalDisplay = !$scope.minimalDisplay;
     };
 }]);

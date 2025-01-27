@@ -691,6 +691,9 @@ app.service('cpu', ['opcodes', 'memory', 'io', function (opcodes, memory, io) {
                         io.write_to_port(portTo, value);
                         self.ip++;
                         break;
+                    case opcodes.STOP:
+                        self.ip++;
+                        return false;
                     case opcodes.HALT:
                         return false;
                     default:
@@ -723,7 +726,11 @@ app.service('cpu', ['opcodes', 'memory', 'io', function (opcodes, memory, io) {
             self.fault = false;
 
             io.reset();
+        },
+        isHalted: function () {
+            return memory.load(this.ip) == opcodes.HALT;
         }
+        
     };
 
     cpu.reset();

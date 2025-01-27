@@ -679,6 +679,12 @@ var app = angular.module('ASMSimulator', []);
                                     code.push(opCode, p1.value, p2.value);
 
                                     break;
+                                case 'STOP':
+                                    checkNoExtraArg('STOP', match[op1_group]);
+                                    opCode = opcodes.STOP;
+                                    code.push(opCode);
+
+                                    break;
                                 default:
                                     throw "Invalid instruction: " + match[2];
                             }
@@ -1404,6 +1410,9 @@ var app = angular.module('ASMSimulator', []);
                         io.write_to_port(portTo, value);
                         self.ip++;
                         break;
+                    case opcodes.STOP:
+                        self.ip++;
+                        return false;
                     case opcodes.HALT:
                         return false;
                     default:
@@ -1436,7 +1445,11 @@ var app = angular.module('ASMSimulator', []);
             self.fault = false;
 
             io.reset();
+        },
+        isHalted: function () {
+            return memory.load(this.ip) == opcodes.HALT;
         }
+        
     };
 
     cpu.reset();
@@ -1619,7 +1632,8 @@ var app = angular.module('ASMSimulator', []);
         IN_REG_PORT: 107,
         OUT_PORT_REG: 108,
         OUT_PORT_NUMBER: 109,
-        HALT: 110,
+        STOP: 254,
+        HALT: 255,
     };
 
     return opcodes;
@@ -1649,6 +1663,8 @@ var app = angular.module('ASMSimulator', []);
     $scope.bitmapMode = false;
 
     $scope.codeSize = 0;
+
+    $scope.minimalDisplay = false;
 
     $scope.code = "";
     function shouldHighlightLines() {
@@ -1682,6 +1698,14 @@ var app = angular.module('ASMSimulator', []);
             $scope.error = e;
             return false;
         }
+    };
+    
+    $scope.startRun = function () {
+        if ($scope.cpu.isHalted()) {
+            $scope.assemble();
+        }
+        
+        $scope.run();
     };
 
     var runner;
@@ -1718,7 +1742,7 @@ var app = angular.module('ASMSimulator', []);
     $scope.curVideoMode = function () {
         return $scope.bitmapMode ? "Dot-Matrix" : "Character";
     };
-    
+
     $scope.getCharClass = function (value) {
         return value < 128 ? "output-normal" : "output-inverted";
     };
@@ -1818,6 +1842,10 @@ var app = angular.module('ASMSimulator', []);
         } else {
             return '';
         }
+    };
+
+    $scope.toggleMinimalDisplay = function () {
+        $scope.minimalDisplay = !$scope.minimalDisplay;
     };
 }]);
 ;app.filter('flag', function () {

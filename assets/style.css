@@ -2,6 +2,10 @@
     font-family: source-code-pro, Courier New;
 }
 
+textarea.source-code {
+    font-weight: bold;
+}
+
 .output-container {
     text-align: center;
 }
@@ -90,19 +94,19 @@
 }
 
 .marker-a {
-    background-color: #9cd375;
+    background-color: #a775d3;
 }
 
 .marker-b {
-	background-color: #96b9d8;
+	background-color: #9dd896;
 }
 
 .marker-c {
-	background-color: #c999eb;
+	background-color: #99a3eb;
 }
 
 .marker-d {
-	background-color: #dfad67;
+	background-color: #df905b;
 }
 
 .marker-f {
